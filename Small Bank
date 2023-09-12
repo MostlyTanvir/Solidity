@@ -1,0 +1,60 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+contract Bank{
+    struct Transaction{
+        uint amount;
+        uint timestamp;
+    }
+
+    struct Balance{
+        
+        uint totalBalance;
+
+        uint numDeposits;
+        mapping (uint=> Transaction) deposits;
+
+
+        uint numWithdraw;
+        mapping (uint => Transaction) withdrawls;
+
+    }
+
+    mapping (address=> Balance) public Balances;
+
+
+    function getWithdrawNum( address _from, uint _numWithdraw) public view returns( Transaction memory){
+        return Balances[_from].withdrawls[_numWithdraw];
+    }
+
+    function getDepositNum(address _from, uint _numDeposits)  public view returns( Transaction memory){
+        return Balances[_from].deposits[_numDeposits];
+    }
+
+    function depositMoney() public payable {
+
+        Balances[msg.sender].totalBalance += msg.value;
+
+        Transaction memory deposit = Transaction(msg.value, block.timestamp);
+
+        Balances[msg.sender].deposits[Balances[msg.sender].numDeposits] = deposit;
+
+        Balances[msg.sender].numDeposits++;
+
+    }
+
+     function withdrawMoney(address payable _to, uint _amount) public {
+
+        Balances[msg.sender].totalBalance -= _amount;
+
+        Transaction memory withdrawl = Transaction(_amount, block.timestamp);
+
+        Balances[msg.sender].withdrawls[Balances[msg.sender].numWithdraw] = withdrawl;
+
+        Balances[msg.sender].numWithdraw++;
+
+        _to.transfer(_amount);
+
+    }
+
+}
